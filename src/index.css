@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+@theme {
+  --color-warm-cream: #F5F5DC;
+  --color-muted-sage: #8F9777;
+  --color-warm-peach: #FFB169;
+  --color-burgundy: #843A39;
+  --color-deep-olive: #36452A;
+
+  --font-serif: "Cormorant Garamond", Georgia, serif;
+  --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    font-family: var(--font-sans);
+    background-color: #F5F5DC;
+    color: #36452A;
+  }
+
+  ::selection {
+    background-color: #843A39;
+    color: #F5F5DC;
+  }
+}
+
+/* Custom scrollbar matching Casa Verde palette */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F5F5DC;
+}
+::-webkit-scrollbar-thumb {
+  background: #8F9777;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #36452A;
+}
+
+/* Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

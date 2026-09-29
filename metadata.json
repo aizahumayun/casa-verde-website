@@ -1,0 +1,6 @@
+{
+  "name": "CASA VERDE",
+  "description": "Contemporary restaurant in Lahore, Pakistan. A table worth gathering around. Seasonal food, warm surroundings, and memorable evenings.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
