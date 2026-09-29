@@ -1,7 +1,11 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { HeroTextOverlay, HeroTextOverlayHandle } from './HeroTextOverlay';
 import heroVideo from '../../assets/video/casa-verde-cinematic.mp4';
 import heroPoster from '../../assets/images/cinematic/09-casa-verde-hero.jpg';
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface CinematicHeroProps {
   onReserveClick: () => void;
@@ -15,9 +19,6 @@ const getHeroScrollHeightVh = (viewportWidth: number): number => {
   return 700; // Desktop (1024px+)
 };
 
-// Responsive interpolation factor for requestAnimationFrame (responsive, fluid, low-latency)
-const INTERPOLATION_FACTOR = 0.22;
-// Small threshold to avoid redundant currentTime assignments while remaining imperceptible to user
 const SEEK_THRESHOLD = 0.02;
 
 export const CinematicHero: React.FC<CinematicHeroProps> = ({
@@ -30,20 +31,8 @@ export const CinematicHero: React.FC<CinematicHeroProps> = ({
   const bottomFadeRef = useRef<HTMLDivElement>(null);
 
   // Component lifecycle & accessibility states
-  const [isVideoReady, setIsVideoReady] = useState(false);
   const [videoError, setVideoError] = useState(false);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-  const [heroHeightVh, setHeroHeightVh] = useState<number>(700);
-
-  // Mutable animation and scroll tracking refs (Zero React re-renders during scroll)
-  const durationRef = useRef(0);
-  const targetTimeRef = useRef(0);
-  const currentInterpolatedTimeRef = useRef(0);
-  const seekPendingRef = useRef(false);
-  const latestSeekTargetRef = useRef(0);
-  const targetProgressRef = useRef(0);
-  const currentInterpolatedProgressRef = useRef(0);
-  const rafIdRef = useRef<number | null>(null);
 
   // 1. Accessibility: Detect prefers-reduced-motion
   useEffect(() => {
@@ -55,198 +44,101 @@ export const CinematicHero: React.FC<CinematicHeroProps> = ({
     return () => mediaQuery.removeEventListener('change', handler);
   }, []);
 
-  // 2. Responsive viewport & hero height calculation
-  const recalculateDimensions = useCallback(() => {
-    if (typeof window === 'undefined') return;
-    const width = window.innerWidth;
-    const nextVh = getHeroScrollHeightVh(width);
-    setHeroHeightVh(nextVh);
-  }, []);
-
+  // Video metadata gates creation of the scroll-controlled timeline.
   useEffect(() => {
-    recalculateDimensions();
-
-    let resizeTimer: number;
-    const handleResize = () => {
-      clearTimeout(resizeTimer);
-      resizeTimer = window.setTimeout(recalculateDimensions, 100);
-    };
-
-    window.addEventListener('resize', handleResize, { passive: true });
-    window.addEventListener('orientationchange', handleResize, { passive: true });
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      window.removeEventListener('orientationchange', handleResize);
-      clearTimeout(resizeTimer);
-    };
-  }, [recalculateDimensions]);
-
-  // 3. Main requestAnimationFrame animation loop:
-  // USER SCROLL -> HERO PROGRESS -> TARGET VIDEO TIME -> requestAnimationFrame -> VIDEO CURRENT TIME
-  const animateScrubbing = useCallback(() => {
-    // A. Smoothly interpolate normalized progress toward latest target
-    const targetProg = targetProgressRef.current;
-    const progDelta = targetProg - currentInterpolatedProgressRef.current;
-
-    if (Math.abs(progDelta) > 0.0002) {
-      currentInterpolatedProgressRef.current += progDelta * INTERPOLATION_FACTOR;
-    } else {
-      currentInterpolatedProgressRef.current = targetProg;
-    }
-
-    const currentProg = currentInterpolatedProgressRef.current;
-
-    // Update editorial text overlays directly on DOM at 60fps
-    if (overlayRef.current) {
-      overlayRef.current.updateProgress(currentProg);
-    }
-
-    // Update bottom transition fade into Our Story section
-    if (bottomFadeRef.current) {
-      const bottomOpacity = currentProg > 0.90 ? (currentProg - 0.90) / 0.10 : 0;
-      bottomFadeRef.current.style.opacity = bottomOpacity.toFixed(3);
-    }
-
-    // B. Map the shared smoothed progress to the video time
-    const video = videoRef.current;
-    const duration = durationRef.current;
-
-    if (video && duration > 0 && !prefersReducedMotion && !videoError) {
-      const clampedTime = Math.max(0, Math.min(duration, currentProg * duration));
-      currentInterpolatedTimeRef.current = clampedTime;
-      latestSeekTargetRef.current = clampedTime;
-
-      // Keep one seek in flight; newer scroll positions replace its pending target.
-      if (!seekPendingRef.current && !video.seeking) {
-        const diffFromCurrent = Math.abs(clampedTime - video.currentTime);
-        if (diffFromCurrent > SEEK_THRESHOLD) {
-          seekPendingRef.current = true;
-          video.currentTime = latestSeekTargetRef.current;
-        }
-      }
-    }
-
-    rafIdRef.current = requestAnimationFrame(animateScrubbing);
-  }, [prefersReducedMotion, videoError]);
-
-  // 4. Video metadata & loading verification
-  useEffect(() => {
-    if (prefersReducedMotion) return;
+    if (prefersReducedMotion || window.matchMedia('(prefers-reduced-motion: reduce)').matches || videoError) return;
 
     const video = videoRef.current;
-    if (!video) return;
+    const container = containerRef.current;
+    if (!video || !container) return;
 
-    const syncInitialScroll = (dur: number) => {
-      const container = containerRef.current;
-      if (!container) return;
-      const rect = container.getBoundingClientRect();
-      const totalDistance = rect.height - window.innerHeight;
-      if (totalDistance > 0) {
-        const currentScroll = -rect.top;
-        const initialProg = Math.max(0, Math.min(1, currentScroll / totalDistance));
-        targetProgressRef.current = initialProg;
-        currentInterpolatedProgressRef.current = initialProg;
-        targetTimeRef.current = initialProg * dur;
-        currentInterpolatedTimeRef.current = targetTimeRef.current;
-        latestSeekTargetRef.current = targetTimeRef.current;
-        if (Math.abs(video.currentTime - latestSeekTargetRef.current) > SEEK_THRESHOLD) {
-          seekPendingRef.current = true;
-          video.currentTime = latestSeekTargetRef.current;
-        }
-      }
-    };
+    let active = true;
+    let initialized = false;
+    let context: gsap.Context | null = null;
+    let timeline: gsap.core.Timeline | null = null;
 
-    const handleReady = () => {
-      if (video.duration && !isNaN(video.duration) && video.duration > 0) {
-        durationRef.current = video.duration;
-        setIsVideoReady(true);
-        video.pause(); // Ensure strictly paused
-        syncInitialScroll(video.duration);
-      }
+    const initializeTimeline = () => {
+      if (!active || initialized || !Number.isFinite(video.duration) || video.duration <= 0) return;
+      initialized = true;
+      video.pause();
+
+      const duration = video.duration;
+      const playhead = { progress: 0 };
+      let lastRequestedTime = Number.NaN;
+
+      context = gsap.context(() => {
+        timeline = gsap.timeline({
+          scrollTrigger: {
+            trigger: container,
+            pin: true,
+            start: 'top top',
+            end: () => `+=${(window.innerHeight * getHeroScrollHeightVh(window.innerWidth)) / 100}`,
+            scrub: 0.15,
+            invalidateOnRefresh: true,
+          },
+        });
+
+        timeline.to(playhead, {
+          progress: 1,
+          duration: 1,
+          ease: 'none',
+          onUpdate: () => {
+            if (!active) return;
+
+            const progress = Math.max(0, Math.min(1, playhead.progress));
+            overlayRef.current?.updateProgress(progress);
+
+            if (bottomFadeRef.current) {
+              const opacity = progress > 0.9 ? (progress - 0.9) / 0.1 : 0;
+              bottomFadeRef.current.style.opacity = opacity.toFixed(3);
+            }
+
+            const targetTime = progress * duration;
+            if (Number.isNaN(lastRequestedTime) || Math.abs(targetTime - lastRequestedTime) >= SEEK_THRESHOLD) {
+              video.currentTime = targetTime;
+              lastRequestedTime = targetTime;
+            }
+          },
+        });
+      }, container);
+
+      ScrollTrigger.refresh();
     };
 
     const handleError = (e: Event) => {
+      if (!active) return;
       console.error('CASA VERDE hero video failed to load:', e, video.error);
       setVideoError(true);
     };
 
-    const handleSeeked = () => {
-      seekPendingRef.current = false;
-    };
-
-    // Check if metadata is already available (cached or fast response)
-    if (video.readyState >= 1 && video.duration && !isNaN(video.duration)) {
-      handleReady();
-    }
-
-    video.addEventListener('loadedmetadata', handleReady);
-    video.addEventListener('loadeddata', handleReady);
-    video.addEventListener('canplay', handleReady);
+    video.addEventListener('loadedmetadata', initializeTimeline);
+    video.addEventListener('durationchange', initializeTimeline);
     video.addEventListener('error', handleError);
-    video.addEventListener('seeked', handleSeeked);
 
-    // Explicitly call load if not started
+    if (video.readyState >= 1) initializeTimeline();
     if (video.readyState === 0) {
       video.load();
     }
 
     return () => {
-      video.removeEventListener('loadedmetadata', handleReady);
-      video.removeEventListener('loadeddata', handleReady);
-      video.removeEventListener('canplay', handleReady);
+      active = false;
+      video.removeEventListener('loadedmetadata', initializeTimeline);
+      video.removeEventListener('durationchange', initializeTimeline);
       video.removeEventListener('error', handleError);
-      video.removeEventListener('seeked', handleSeeked);
+      timeline?.scrollTrigger?.kill();
+      timeline?.kill();
+      context?.revert();
     };
-  }, [prefersReducedMotion]);
-
-  // 5. Scroll listener: Updates mutable target values only
-  useEffect(() => {
-    const handleScroll = () => {
-      const container = containerRef.current;
-      if (!container) return;
-
-      const rect = container.getBoundingClientRect();
-      const totalScrollableDistance = rect.height - window.innerHeight;
-
-      if (totalScrollableDistance <= 0) return;
-
-      const currentScroll = -rect.top;
-      const rawProgress = currentScroll / totalScrollableDistance;
-      const clampedProgress = Math.max(0, Math.min(1, rawProgress));
-
-      targetProgressRef.current = clampedProgress;
-
-      if (durationRef.current > 0) {
-        targetTimeRef.current = clampedProgress * durationRef.current;
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll(); // Initial measure
-
-    // Start single continuous RAF loop
-    rafIdRef.current = requestAnimationFrame(animateScrubbing);
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      if (rafIdRef.current) {
-        cancelAnimationFrame(rafIdRef.current);
-      }
-    };
-  }, [animateScrubbing]); //use callback ensures animateScrubbing is stable
+  }, [prefersReducedMotion, videoError]);
 
   return (
     <section
       id="home"
       ref={containerRef}
-      className="relative w-full bg-[#12160F]"
-      style={{
-        minHeight: `${heroHeightVh}vh`,
-      }}
+      className="relative h-screen w-full bg-[#12160F]"
     >
-      {/* Sticky Viewport Container: 100vh with 100dvh support */}
-      <div className="sticky top-0 left-0 w-full h-screen overflow-hidden">
+      {/* ScrollTrigger pins this single viewport while the cinematic sequence plays. */}
+      <div className="relative w-full h-full overflow-hidden">
         {/* Cinematic Media Layer */}
         <div className="relative w-full h-full">
           {/* Static Fallback Poster: ONLY rendered when reduced-motion is requested or if video errors */}
