@@ -1,6 +1,6 @@
-import React from 'react';
-import { X, Sparkles } from 'lucide-react';
-import { FULL_MENU_SECTIONS } from '../../data/content';
+import React from "react";
+import { X, Sparkles } from "lucide-react";
+import { FULL_MENU_SECTIONS } from "../../data/content";
 
 interface FullMenuModalProps {
   isOpen: boolean;
@@ -25,10 +25,11 @@ export const FullMenuModal: React.FC<FullMenuModalProps> = ({
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-6 right-6 p-2 rounded-full text-[#36452A]/70 hover:text-[#843A39] hover:bg-[#8F9777]/10 transition-colors focus:outline-hidden"
+          className="
+           absolute top-1.5 right-1.5 sm:top-5 sm:right-5 lg:top-7 lg:right-7 inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-full text-deep-olive/70 hover:text-burgundy hover:bg-muted-sage/10 transition-colors focus:outline-hidden focus-visible:ring-2 focus-visible:ring-burgundy/40"
           aria-label="Close Full Menu"
         >
-          <X className="w-6 h-6" />
+          <X className="w-5 h-5 sm:w-5 sm:h-5" />
         </button>
 
         {/* Header */}
@@ -41,8 +42,8 @@ export const FullMenuModal: React.FC<FullMenuModalProps> = ({
             The Autumn Table
           </h2>
           <p className="text-xs sm:text-sm text-[#36452A]/75 font-light leading-relaxed">
-            Our menu evolves with the harvest of our regional partners. We invite you to
-            dine family-style, sharing plates across the table.
+            Our menu evolves with the harvest of our regional partners. We
+            invite you to dine family-style, sharing plates across the table.
           </p>
         </div>
 
@@ -74,8 +75,8 @@ export const FullMenuModal: React.FC<FullMenuModalProps> = ({
         {/* Footer note & CTA inside modal */}
         <div className="mt-12 pt-8 border-t border-[#8F9777]/20 flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
           <p className="text-xs text-[#36452A]/60 max-w-md">
-            Dietary preferences accommodated with advance notice. Our bread and pasta are
-            made fresh in-house every afternoon.
+            Dietary preferences accommodated with advance notice. Our bread and
+            pasta are made fresh in-house every afternoon.
           </p>
           <div className="flex items-center space-x-4">
             <button

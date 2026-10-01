@@ -16,13 +16,13 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({ isOpen, onCl
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-md flex items-center justify-center p-4 sm:p-6 animate-fadeIn">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 animate-fadeIn">
       <div className="fixed inset-0" onClick={onClose} aria-hidden="true" />
 
-      <div className="relative w-full max-w-xl bg-[#F5F5DC] text-[#36452A] rounded-xs shadow-2xl p-8 sm:p-12 border border-[#8F9777]/40 z-10">
+      <div className="relative w-full max-w-xl max-h-[calc(100dvh-1.5rem)] overflow-y-auto bg-[#F5F5DC] text-[#36452A] rounded-xs shadow-2xl p-5 sm:p-8 lg:p-12 border border-[#8F9777]/40 z-10">
         <button
           onClick={onClose}
-          className="absolute top-6 right-6 p-2 rounded-full text-[#36452A]/70 hover:text-[#843A39] hover:bg-[#8F9777]/10 transition-colors focus:outline-hidden"
+          className="absolute top-3 right-3 sm:top-6 sm:right-6 p-2 rounded-full text-[#36452A]/70 hover:text-[#843A39] hover:bg-[#8F9777]/10 transition-colors focus:outline-hidden"
           aria-label="Close Reservation Window"
         >
           <X className="w-5 h-5" />
@@ -77,7 +77,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({ isOpen, onCl
                 <label className="block uppercase tracking-wider text-[11px] font-medium text-[#36452A] mb-2 flex items-center gap-1.5">
                   <Users className="w-3.5 h-3.5 text-[#843A39]" /> Party Size
                 </label>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {['2 Guests', '4 Guests', '6 Guests', '8+ Private'].map((opt) => (
                     <button
                       key={opt}
@@ -100,7 +100,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({ isOpen, onCl
                 <label className="block uppercase tracking-wider text-[11px] font-medium text-[#36452A] mb-2 flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5 text-[#843A39]" /> Seating Time
                 </label>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {['5:30 PM', '7:00 PM', '8:30 PM', '9:45 PM'].map((time) => (
                     <button
                       key={time}
@@ -123,7 +123,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({ isOpen, onCl
                 <label className="block uppercase tracking-wider text-[11px] font-medium text-[#36452A] mb-2 flex items-center gap-1.5">
                   <Calendar className="w-3.5 h-3.5 text-[#843A39]" /> Dining Date Window
                 </label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   {['Tonight', 'This Weekend', 'Upcoming Week'].map((date) => (
                     <button
                       key={date}

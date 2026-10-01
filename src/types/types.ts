@@ -19,7 +19,9 @@ export interface GalleryItem {
 
 export interface Testimonial {
   quote: string;
+  authorName: string;
   authorNote: string;
+  avatarInitials: string;
 }
 
 export interface HeroScene {

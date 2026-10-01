@@ -215,15 +215,63 @@ export const GALLERY_ITEMS: GalleryItem[] = [
 export const TESTIMONIALS: Testimonial[] = [
   {
     quote: 'Every detail felt thoughtful without ever feeling overdone.',
-    authorNote: 'Autumn Dinner Guest',
+    authorName: 'Elena Marlowe',
+    authorNote: 'Returning Guest',
+    avatarInitials: 'EM',
   },
   {
     quote: 'The kind of evening where you stop checking the time.',
-    authorNote: 'Private Gathering',
+    authorName: 'Daniel Hart',
+    authorNote: 'Local Guide',
+    avatarInitials: 'DH',
   },
   {
     quote: 'Beautiful food, warm service, and an atmosphere you want to stay in.',
-    authorNote: 'Table for Four',
+    authorName: 'Maya Chen',
+    authorNote: 'Food Writer',
+    avatarInitials: 'MC',
+  },
+  {
+    quote: 'The first place I think of when an ordinary dinner deserves to feel special.',
+    authorName: 'Julian Price',
+    authorNote: 'Guest',
+    avatarInitials: 'JP',
+  },
+  {
+    quote: 'A beautiful meal, but what stayed with us was how warmly we were welcomed.',
+    authorName: 'Amara Lewis',
+    authorNote: 'Returning Guest',
+    avatarInitials: 'AL',
+  },
+  {
+    quote: 'Seasonal cooking with a sense of place in every thoughtful detail.',
+    authorName: 'Theo Reed',
+    authorNote: 'Food Writer',
+    avatarInitials: 'TR',
+  },
+  {
+    quote: 'We came for a late dinner and somehow made the whole evening of it.',
+    authorName: 'Isabel Reyes',
+    authorNote: 'Guest',
+    avatarInitials: 'IR',
+  },
+  {
+    quote: 'An intimate room, generous hospitality, and food worth slowing down for.',
+    authorName: 'Noah Bennett',
+    authorNote: 'Local Guide',
+    avatarInitials: 'NB',
+  },
+  {
+    quote: 'It feels quietly special, from the first hello to the last course.',
+    authorName: 'Clara Whitmore',
+    authorNote: 'Returning Guest',
+    avatarInitials: 'CW',
+  },
+  {
+    quote: 'The kind of table where conversation lingers as long as the meal.',
+    authorName: 'Sami Rahman',
+    authorNote: 'Guest',
+    avatarInitials: 'SR',
   },
 ];
 
